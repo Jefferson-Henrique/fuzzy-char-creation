@@ -1,0 +1,16 @@
+# Unity .gitignore file.
+.DS_Store
+Library
+Library/*
+*.csproj
+*.sln
+*.userprefs
+*.unityproj
+Temp
+*.pidb
+Build
+/*.sqdb
+*.sqdb
+*.sqdb.meta
+
+Assets/Resources/Scenes/Menu.unity
