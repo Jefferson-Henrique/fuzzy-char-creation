@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -28,6 +29,10 @@ public class FuzzyGenerator : MonoBehaviour {
 
 	private bool created = false;
 
+	private Dictionary<string, UISlider> sliders = new Dictionary<string, UISlider>();
+
+	private FuzzyQuestionary fuzzyQuestionary;
+
 	// Update is called once per frame
 	void Start () {
 		int numAttrs = attributesInput.Length;
@@ -35,7 +40,7 @@ public class FuzzyGenerator : MonoBehaviour {
 
 		questionState = new int[numAttrs];
 
-
+		fuzzyQuestionary = new FuzzyQuestionary();
 		ShowQuestion ();
 	}
 
@@ -51,7 +56,23 @@ public class FuzzyGenerator : MonoBehaviour {
 	}
 
 	public void NextQuestion() {
+		FuzzyResponse fr = new FuzzyResponse();
+		for (int index = 0; index < attributesInput.Length; index++) {
+			fr.inputs[attributesInput[index]] = termLinguistics[questionState[index]];
+		}
+		for (int index = 0; index < attributesOutput.Length; index++) {
+			string attr = attributesOutput[index];
+			fr.outputs[attr] = sliders[attr].value;
+		}
+	
+		fuzzyQuestionary.responses.Add(fr);
+
 		questionStateIndex++;
+
+		if (questionStateIndex > (Mathf.Pow(termLinguistics.Length, attributesInput.Length) - 1)) {
+			FinishQuestions();
+			return;
+		}
 
 		int remainValue = questionStateIndex;
 		for (int index = 0; index < attributesInput.Length; index++) {
@@ -65,14 +86,12 @@ public class FuzzyGenerator : MonoBehaviour {
 		}
 
 		ShowQuestion();
-
-		if (questionStateIndex >= (Mathf.Pow(termLinguistics.Length, attributesInput.Length) - 1)) {
-			FinishQuestions();		
-		}
 	}
 
 	public void FinishQuestions() {
 		nextQuestionBtn.SetActive(false);
+
+		UnityEngine.Debug.Log(fuzzyQuestionary.ToJSON());
 	}
 
 	public void Update() {
@@ -85,6 +104,8 @@ public class FuzzyGenerator : MonoBehaviour {
 					SliderFuzzy sliderFuzzy = NGUITools.AddChild (nguiParent, sliderPrefab).GetComponent<SliderFuzzy> ();
 					sliderFuzzy.SetAttr (attr);
 					sliderFuzzy.adjustChar = adjustChar;
+
+					sliders[attr] = sliderFuzzy.GetComponent<UISlider>();
 
 					Vector3 boxSize = ((BoxCollider)sliderFuzzy.gameObject.collider).size;
 

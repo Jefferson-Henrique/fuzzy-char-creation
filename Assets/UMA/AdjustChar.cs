@@ -7,7 +7,7 @@ using UMA;
 
 public class AdjustChar : MonoBehaviour {
 
-	private UMAData umaData;
+	public UMAData umaData;
 	private UMADnaHumanoid umaDNA;
 	
 	public void Update() {
